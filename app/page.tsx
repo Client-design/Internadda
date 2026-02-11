@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TrustBadges } from '@/components/TrustBadges'
 import { InternshipCard } from '@/components/InternshipCard'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Search, TrendingUp, Users, BookOpen, Briefcase, CheckCircle, Star, Shield, Zap, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -94,24 +94,32 @@ const homeStats = [
   { value: '48 Hours', label: 'HIRING TIME', icon: Clock },
 ]
 
-const skills = ['Python', 'React', 'Django', 'PostgreSQL', 'Tailwind', 'Pandas', 'Matplotlib']; // Declare skills variable
+const skills = ['Python', 'React', 'Django', 'PostgreSQL', 'Tailwind', 'Pandas', 'Matplotlib'];
+const stats = homeStats;
+const recommendedInternships = featuredInternships;
 
-const stats = homeStats; // Declare stats variable
-
-const recommendedInternships = featuredInternships; // Declare recommendedInternships variable
+// Collaboration slide images
+const collaborationSlides = ['/slide1.jpg', '/slide2.jpg', '/slide3.jpg', '/slide4.jpg'];
 
 export default function Home() {
   const [carouselIndex, setCarouselIndex] = useState(0)
-  const [slideIndex, setSlideIndex] = useState(0) // New state for auto-scroll slides
-  const totalSlides = 6 // Adjust based on number of slide images you have
+  const [slideIndex, setSlideIndex] = useState(0)
 
-  // Auto-scroll logic for Collaboration images
+  // Auto-scrolling logic for the Collaboration visual
   useEffect(() => {
     const timer = setInterval(() => {
-      setSlideIndex((prev) => (prev + 1) % totalSlides)
-    }, 3000) // Changes every 3 seconds
+      setSlideIndex((prev) => (prev + 1) % collaborationSlides.length)
+    }, 3000)
     return () => clearInterval(timer)
   }, [])
+
+  const handleCarouselNext = () => {
+    setCarouselIndex((prev) => (prev + 1) % globalPartners.length)
+  }
+
+  const handleCarouselPrev = () => {
+    setCarouselIndex((prev) => (prev - 1 + globalPartners.length) % globalPartners.length)
+  }
 
   return (
     <>
@@ -119,7 +127,6 @@ export default function Home() {
       <main className="min-h-screen bg-background">
         {/* Compact Hero Section */}
         <section className="relative py-8 sm:py-12 md:py-16 overflow-hidden">
-          {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground to-foreground/95" />
           
           <div className="relative w-full px-4 sm:px-6 lg:px-8">
@@ -132,7 +139,6 @@ export default function Home() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6 }}
                 >
-                  {/* MSME Badge */}
                   <motion.div
                     className="inline-block"
                     initial={{ opacity: 0, y: 10 }}
@@ -145,7 +151,6 @@ export default function Home() {
                     </Badge>
                   </motion.div>
 
-                  {/* Main Headline */}
                   <motion.div
                     className="space-y-3"
                     initial={{ opacity: 0, y: 20 }}
@@ -159,11 +164,10 @@ export default function Home() {
                       </span>
                     </h1>
                     <p className="text-base sm:text-lg text-gray-300 max-w-lg leading-relaxed">
-                      7000+ students placed. Verified companies. Transparent stipends. Direct interviews. No middlemen.
+                      7000+ students enrolled. Verified companies. Transparent stipends. Direct interviews. No middlemen.
                     </p>
                   </motion.div>
 
-                  {/* CTA Buttons */}
                   <motion.div
                     className="flex flex-col sm:flex-row gap-4"
                     initial={{ opacity: 0, y: 20 }}
@@ -186,45 +190,60 @@ export default function Home() {
                     </Button>
                   </motion.div>
 
-                  {/* Social Proof */}
+                  {/* Social Proof with Student Images */}
                   <motion.div
-                  className="flex items-center gap-4 pt-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                >
-                  <div className="flex -space-x-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="w-10 h-10 rounded-full border-2 border-foreground overflow-hidden bg-muted"
-                      >
-                        <img 
-                          src={`/student${i}.jpg`} 
-                          alt={`Student ${i}`} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-gray-200 font-semibold">
-                    7,000+ <span className="text-gray-400 uppercase">Students Enrolled</span>
-                  </p>
+                    className="flex items-center gap-4 pt-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                  >
+                    <div className="flex -space-x-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="w-10 h-10 rounded-full border-2 border-foreground overflow-hidden bg-gray-800"
+                        >
+                          <img 
+                            src={`/student${i}.jpg`} 
+                            alt={`Student ${i}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-gray-200 font-semibold">
+                      7,000+ <span className="text-gray-400">STUDENTS ENROLLED</span>
+                    </p>
+                  </motion.div>
                 </motion.div>
 
-                {/* Right Visual - Placeholder for image */}
+                {/* Right Visual - Auto Scrolling Collaborations */}
                 <motion.div
-                  className="relative h-64 lg:h-80 rounded-2xl overflow-hidden hidden lg:block"
+                  className="relative h-64 lg:h-80 rounded-2xl overflow-hidden hidden lg:block border border-white/10"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-primary/20 backdrop-blur-sm" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                      <div className="text-5xl font-black text-white/20">∞</div>
-                      <p className="text-white/40 text-sm font-semibold">Infinite Opportunities</p>
-                    </div>
+                  <AnimatePresence mode='wait'>
+                    <motion.img
+                      key={slideIndex}
+                      src={collaborationSlides[slideIndex]}
+                      alt="Our Collaborations"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8 }}
+                    />
+                  </AnimatePresence>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                    {collaborationSlides.map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`h-1.5 rounded-full transition-all ${slideIndex === i ? 'bg-primary w-6' : 'bg-white/40 w-1.5'}`}
+                      />
+                    ))}
                   </div>
                 </motion.div>
               </div>
@@ -267,7 +286,6 @@ export default function Home() {
               </motion.div>
 
               <div className="grid lg:grid-cols-2 gap-12 items-center">
-                {/* Quality Features */}
                 <motion.div
                   className="space-y-8"
                   variants={staggerContainer}
@@ -318,7 +336,6 @@ export default function Home() {
                       </div>
                     </blockquote>
                     
-                    {/* Navigation Dots and Arrows */}
                     <div className="flex items-center justify-between gap-4 mt-6">
                       <div className="flex items-center gap-2">
                         {globalPartners.map((_, idx) => (
@@ -335,14 +352,12 @@ export default function Home() {
                         <button
                           onClick={handleCarouselPrev}
                           className="p-2 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
-                          aria-label="Previous collaboration"
                         >
                           <ChevronLeft size={20} />
                         </button>
                         <button
                           onClick={handleCarouselNext}
                           className="p-2 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
-                          aria-label="Next collaboration"
                         >
                           <ChevronRight size={20} />
                         </button>
@@ -535,7 +550,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* Bottom CTA Section */}
         <section className="py-20 sm:py-32 bg-primary text-primary-foreground">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             <motion.h2
