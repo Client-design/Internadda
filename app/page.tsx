@@ -102,14 +102,16 @@ const recommendedInternships = featuredInternships; // Declare recommendedIntern
 
 export default function Home() {
   const [carouselIndex, setCarouselIndex] = useState(0)
+  const [slideIndex, setSlideIndex] = useState(0) // New state for auto-scroll slides
+  const totalSlides = 6 // Adjust based on number of slide images you have
 
-  const handleCarouselNext = () => {
-    setCarouselIndex((prev) => (prev + 1) % globalPartners.length)
-  }
-
-  const handleCarouselPrev = () => {
-    setCarouselIndex((prev) => (prev - 1 + globalPartners.length) % globalPartners.length)
-  }
+  // Auto-scroll logic for Collaboration images
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % totalSlides)
+    }, 3000) // Changes every 3 seconds
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <>
@@ -186,23 +188,28 @@ export default function Home() {
 
                   {/* Social Proof */}
                   <motion.div
-                    className="flex items-center gap-4 pt-4"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                  >
-                    <div className="flex -space-x-3">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary border-2 border-foreground"
+                  className="flex items-center gap-4 pt-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  <div className="flex -space-x-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="w-10 h-10 rounded-full border-2 border-foreground overflow-hidden bg-muted"
+                      >
+                        <img 
+                          src={`/student${i}.jpg`} 
+                          alt={`Student ${i}`} 
+                          className="w-full h-full object-cover"
                         />
-                      ))}
-                    </div>
-                    <p className="text-gray-200 font-semibold">
-                      7,000+ <span className="text-gray-400">STUDENTS PLACED</span>
-                    </p>
-                  </motion.div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-gray-200 font-semibold">
+                    7,000+ <span className="text-gray-400 uppercase">Students Enrolled</span>
+                  </p>
                 </motion.div>
 
                 {/* Right Visual - Placeholder for image */}
