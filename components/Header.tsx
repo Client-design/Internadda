@@ -27,9 +27,11 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      {/* Expanded width to match page layout for big screens */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Section - Using logo.jpg from public folder */}
+          
+          {/* Logo Section - Visible on both Mobile and Desktop */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
             <div className="relative w-10 h-10 overflow-hidden rounded-full shadow-lg transition-transform group-hover:scale-105 border border-primary/20">
               <Image 
@@ -40,16 +42,17 @@ export function Header() {
                 priority
               />
             </div>
-            <div className="hidden sm:flex flex-col leading-tight">
-              <span className="font-bold text-lg">
+            {/* Removed 'hidden sm:flex' to show name on mobile */}
+            <div className="flex flex-col leading-tight">
+              <span className="font-bold text-base sm:text-lg">
                 <span className="text-foreground">INTERN</span>
                 <span className="text-primary">ADDA</span>
               </span>
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">India's Adda For Internships</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider">India's Adda For Internships</span>
             </div>
           </Link>
 
-          {/* Desktop Navigation - Updated with Active Glow */}
+          {/* Desktop Navigation - Active Glow */}
           <nav className="hidden md:flex items-center gap-8 mx-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href
@@ -65,7 +68,6 @@ export function Header() {
                   )}
                 >
                   {item.label}
-                  {/* Underline Glow Effect for Active Page */}
                   {isActive && (
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary shadow-[0_0_12px_rgba(0,82,204,0.8)] rounded-full animate-in fade-in zoom-in duration-500" />
                   )}
@@ -115,7 +117,7 @@ export function Header() {
           </button>
         </div>
 
-        {/* Mobile Navigation - Updated with Active Indicators */}
+        {/* Mobile Navigation - Active Indicators */}
         {isOpen && (
           <div className="md:hidden border-t border-border py-4 space-y-3 pb-6 animate-in slide-in-from-top duration-300">
             {navItems.map((item) => {
