@@ -27,22 +27,21 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Expanded width to match page layout for big screens */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo Section - Visible on both Mobile and Desktop */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
+          {/* Logo Section */}
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0 group" aria-label="InternAdda Home">
             <div className="relative w-10 h-10 overflow-hidden rounded-full shadow-lg transition-transform group-hover:scale-105 border border-primary/20">
               <Image 
                 src="/logo.jpg" 
                 alt="InternAdda Logo" 
                 fill 
                 className="object-cover"
-                priority
+                priority // Optimization: Immediate load for LCP
+                sizes="40px"
               />
             </div>
-            {/* Removed 'hidden sm:flex' to show name on mobile */}
             <div className="flex flex-col leading-tight">
               <span className="font-bold text-base sm:text-lg">
                 <span className="text-foreground">INTERN</span>
@@ -52,14 +51,15 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Active Glow */}
-          <nav className="hidden md:flex items-center gap-8 mx-auto">
+          {/* Desktop Navigation - SEO: Semantic nav tag */}
+          <nav className="hidden md:flex items-center gap-8 mx-auto" aria-label="Main Navigation">
             {navItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     "relative text-sm font-medium transition-all duration-300 py-1",
                     isActive 
@@ -79,8 +79,8 @@ export function Header() {
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
             {user ? (
-              <>
-                <span className="text-sm text-muted-foreground">{user.email}</span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground hidden lg:inline-block">{user.email}</span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -90,9 +90,9 @@ export function Header() {
                   <LogOut size={16} className="mr-1" />
                   Sign Out
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
+              <nav className="flex items-center gap-3" aria-label="Authentication">
                 <Link href="/auth/signin">
                   <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10 bg-transparent transition-all duration-300">
                     Sign In
@@ -103,7 +103,7 @@ export function Header() {
                     Get Started
                   </Button>
                 </Link>
-              </>
+              </nav>
             )}
           </div>
 
@@ -111,21 +111,23 @@ export function Header() {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors text-foreground"
+            aria-expanded={isOpen}
             aria-label="Toggle Menu"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Navigation - Active Indicators */}
+        {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden border-t border-border py-4 space-y-3 pb-6 animate-in slide-in-from-top duration-300">
+          <nav className="md:hidden border-t border-border py-4 space-y-3 pb-6 animate-in slide-in-from-top duration-300" aria-label="Mobile Navigation">
             {navItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     "block px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                     isActive 
@@ -148,12 +150,12 @@ export function Header() {
                 </Button>
               ) : (
                 <>
-                  <Link href="/auth/signin" className="flex-1">
+                  <Link href="/auth/signin" className="flex-1" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" size="sm" className="w-full border-primary text-primary hover:bg-primary/10 bg-transparent">
                       Sign In
                     </Button>
                   </Link>
-                  <Link href="/auth/signup" className="flex-1">
+                  <Link href="/auth/signup" className="flex-1" onClick={() => setIsOpen(false)}>
                     <Button size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                       Get Started
                     </Button>
@@ -161,7 +163,7 @@ export function Header() {
                 </>
               )}
             </div>
-          </div>
+          </nav>
         )}
       </div>
     </header>
