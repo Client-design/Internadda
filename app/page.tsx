@@ -1,28 +1,12 @@
-"use client"
-
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Users, CheckCircle, Shield, Clock, GraduationCap, Award, Zap, Star, Briefcase, TrendingUp } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { ArrowRight, Users, CheckCircle, Shield, Clock, GraduationCap, Award, Zap, Star, Briefcase } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
-  viewport: { once: true },
-}
-
-const staggerContainer = {
-  initial: { opacity: 0 },
-  whileInView: { opacity: 1 },
-  transition: { staggerChildren: 0.1 },
-  viewport: { once: true },
-}
+// Import client components for interactivity
+import { HeroVisual, AnimatedSection, AnimatedCard } from './page-client-components'
 
 const featuredInternships = [
   {
@@ -63,37 +47,63 @@ const featuredInternships = [
   },
 ]
 
-// Enhanced Internship Card with Logo Stack
+// SEO: Generate JSON-LD JobPosting data
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": featuredInternships.map((job, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "item": {
+      "@type": "JobPosting",
+      "title": job.title,
+      "description": `Join ${job.company} as a ${job.title}. Skills required: ${job.skills.join(', ')}. Stipend: ${job.stipend}.`,
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": job.company,
+        "logo": "https://internadda.com/logo.jpg"
+      },
+      "jobLocationType": "TELECOMMUTE",
+      "baseSalary": {
+        "@type": "MonetaryAmount",
+        "currency": "INR",
+        "value": {
+          "@type": "QuantitativeValue",
+          "value": job.stipend,
+          "unitText": "MONTH"
+        }
+      }
+    }
+  }))
+}
+
 const InternshipCard = ({ title, company, stipend, location, skills, applicants, otherCompaniesCount, image, companyLogos }: any) => (
-  <div className="bg-white rounded-[2.5rem] border border-blue-50 shadow-xl overflow-hidden w-full max-w-[420px] flex flex-col group transition-all duration-300 hover:shadow-2xl hover:border-blue-200">
-    {/* Hero Image Section */}
+  <article className="bg-white rounded-[2.5rem] border border-blue-50 shadow-xl overflow-hidden w-full max-w-[420px] flex flex-col group transition-all duration-300 hover:shadow-2xl hover:border-blue-200">
     <div className="relative h-56 w-full bg-gray-100 overflow-hidden">
       <Image 
         src={image} 
-        alt={title} 
+        alt={`${title} at ${company}`} 
         fill 
+        sizes="(max-width: 768px) 100vw, 420px"
         className="object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      {/* Applied Badge */}
       <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20">
-        <span className="text-orange-500 text-xs">🔥</span>
+        <span className="text-orange-500 text-xs" aria-hidden="true">🔥</span>
         <span className="text-white text-[10px] font-bold tracking-tight">{applicants} Applied</span>
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
     </div>
 
-    {/* Content Section */}
     <div className="px-8 pb-8 pt-2 flex flex-col items-center text-center">
       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
         HIRING AT {company} & OTHERS
       </p>
 
-      {/* Company Logo Stack & Count */}
       <div className="flex items-center justify-center gap-3 mb-6">
         <div className="flex -space-x-3">
           {companyLogos.map((logo: string, idx: number) => (
             <div key={idx} className="relative w-9 h-9 rounded-full border-2 border-white bg-white shadow-sm overflow-hidden">
-              <Image src={logo} alt="Partner" fill className="object-cover" />
+              <Image src={logo} alt="Partner Logo" fill className="object-cover" />
             </div>
           ))}
         </div>
@@ -104,7 +114,6 @@ const InternshipCard = ({ title, company, stipend, location, skills, applicants,
         {title}
       </h3>
 
-      {/* Stipend & Location */}
       <div className="grid grid-cols-2 w-full border-y border-gray-100 py-5 mb-6">
         <div className="border-r border-gray-100 flex flex-col items-center">
           <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Stipend</p>
@@ -116,7 +125,6 @@ const InternshipCard = ({ title, company, stipend, location, skills, applicants,
         </div>
       </div>
 
-      {/* Skills Required */}
       <div className="w-full mb-8">
         <p className="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest">Skills Required</p>
         <div className="flex flex-wrap justify-center gap-2">
@@ -133,23 +141,13 @@ const InternshipCard = ({ title, company, stipend, location, skills, applicants,
       </Button>
       
       <p className="text-[10px] text-gray-400 font-semibold mt-5 uppercase tracking-widest">
-         Ending Soon <span className="mx-1">•</span> AI Interviews
+         Ending Soon <span className="mx-1" aria-hidden="true">•</span> AI Interviews
       </p>
     </div>
-  </div>
+  </article>
 )
 
 export default function Home() {
-  const [carouselIndex, setCarouselIndex] = useState(0)
-  const [slideIndex, setSlideIndex] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSlideIndex((prev) => (prev + 1) % collaborationSlides.length)
-    }, 3000)
-    return () => clearInterval(timer)
-  }, [])
-
   const trustMetrics = [
     { icon: Shield, title: '100% VERIFIED', value: '500+ Companies' },
     { icon: Users, title: 'ACTIVE STUDENTS', value: '7,200+' },
@@ -164,17 +162,16 @@ export default function Home() {
     { name: 'Arjuna-AI', logo: '💻' },
   ]
 
-  const globalPartners = [
-    { name: 'Tracxn', quote: '"Most trusted internship platform in India."', logo: '🌐' },
-    { name: 'LAREX', quote: '"Transparent, student-focused ecosystem."', logo: '🌐' },
-    { name: 'Arjuna-AI', quote: '"Bridging industry-academia gap effectively."', logo: '🌐' },
-  ]
-
-  const collaborationSlides = ['/slide1.jpg', '/slide2.jpg', '/slide3.jpg', '/slide4.jpg', '/slide5.jpg', '/slide6.jpg'];
   const studentAvatars = ['/student1.jpg', '/student2.jpg', '/student3.jpg', '/student4.jpg'];
 
   return (
     <>
+      {/* SEO: Structured Data Injection */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
       <Header />
       <main className="min-h-screen bg-white overflow-x-hidden flex flex-col">
         {/* Trust Badge Strip */}
@@ -195,15 +192,10 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-[#0A2647] to-[#144272] overflow-hidden">
-          <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12 md:py-20 flex flex-col items-center lg:block">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12 md:py-20">
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               {/* Left Content */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-center lg:text-left flex flex-col items-center lg:items-start"
-              >
+              <div className="text-center lg:text-left flex flex-col items-center lg:items-start">
                 <Badge className="bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20 px-4 py-1.5 rounded-full mb-6 w-fit text-xs font-semibold tracking-wide">
                   India's #1 Internship Platform
                 </Badge>
@@ -245,76 +237,47 @@ export default function Home() {
                     <span className="font-bold text-white text-sm md:text-base">7,200+</span> students enrolled
                   </p>
                 </div>
-              </motion.div>
+              </div>
 
-              {/* Right Visual */}
-              <motion.div
-                className="relative h-64 md:h-80 lg:h-96 rounded-2xl overflow-hidden border border-white/5 shadow-2xl"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
-              >
-                <AnimatePresence mode='wait'>
-                  <motion.img
-                    key={slideIndex}
-                    src={collaborationSlides[slideIndex]}
-                    alt="Collaborations"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
-                  />
-                </AnimatePresence>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A2647]/60 to-transparent" />
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
-                  {collaborationSlides.map((_, i) => (
-                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${slideIndex === i ? 'bg-[#FFD700] w-6' : 'bg-white/30 w-1'}`} />
-                  ))}
-                </div>
-              </motion.div>
+              {/* Right Visual: Optimization - Added priority for LCP */}
+              <HeroVisual />
             </div>
 
             {/* Trust Metrics */}
-            <motion.div
-              className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 md:mt-16 pt-8 border-t border-white/10 text-center"
-              variants={staggerContainer}
-              initial="initial"
-              whileInView="whileInView"
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 md:mt-16 pt-8 border-t border-white/10 text-center">
               {trustMetrics.map((metric) => {
                 const Icon = metric.icon
                 return (
-                  <motion.div key={metric.title} variants={fadeInUp} className="text-white flex flex-col items-center">
-                    <Icon className="text-[#FFD700] mb-2 opacity-90" size={24} />
+                  <div key={metric.title} className="text-white flex flex-col items-center">
+                    <Icon className="text-[#FFD700] mb-2 opacity-90" size={24} aria-hidden="true" />
                     <p className="text-xl md:text-2xl font-bold">{metric.value}</p>
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">{metric.title}</p>
-                  </motion.div>
+                  </div>
                 )
               })}
-            </motion.div>
+            </div>
           </div>
         </section>
 
         {/* Partner Strip */}
-        <div className="bg-white py-8 border-b border-gray-100 flex justify-center">
+        <section className="bg-white py-8 border-b border-gray-100 flex justify-center" aria-label="Academic Partners">
           <div className="max-w-[1400px] w-full mx-auto px-4">
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 lg:gap-20">
               <p className="w-full text-center lg:w-auto text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 lg:mb-0">Academic Partners</p>
               {partners.map((partner, idx) => (
                 <div key={idx} className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-default">
-                  <span className="text-2xl">{partner.logo}</span>
+                  <span className="text-2xl" aria-hidden="true">{partner.logo}</span>
                   <span className="font-semibold text-gray-600 text-sm md:text-base">{partner.name}</span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Internship Listings */}
         <section className="py-16 md:py-24 bg-white flex flex-col items-center">
           <div className="max-w-[1400px] w-full px-4 lg:px-8">
-            <motion.div className="text-center mb-16 flex flex-col items-center" {...fadeInUp}>
+            <div className="text-center mb-16 flex flex-col items-center">
               <Badge className="bg-[#0A2647]/5 text-[#0A2647] px-4 py-1 rounded-full mb-4 text-xs font-bold border-none">
                 RECOMMENDED
               </Badge>
@@ -324,20 +287,15 @@ export default function Home() {
               <p className="text-gray-500 max-w-2xl font-light">
                 Secure your future with positions at India's top tech startups.
               </p>
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center"
-              variants={staggerContainer}
-              initial="initial"
-              whileInView="whileInView"
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
               {featuredInternships.map((internship) => (
-                <motion.div key={internship.id} variants={fadeInUp} className="w-full flex justify-center">
+                <div key={internship.id} className="w-full flex justify-center">
                   <InternshipCard {...internship} />
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
             <div className="flex justify-center mt-16">
               <Link href="/internships">
@@ -352,29 +310,29 @@ export default function Home() {
         {/* Gold Standard Section */}
         <section className="py-20 bg-gray-50/50 flex flex-col items-center">
           <div className="max-w-[1200px] w-full px-4 lg:px-8">
-            <motion.div className="text-center mb-16 flex flex-col items-center" {...fadeInUp}>
-              <div className="w-12 h-1 bg-[#FFD700] mb-6 rounded-full" />
+            <div className="text-center mb-16 flex flex-col items-center">
+              <div className="w-12 h-1 bg-[#FFD700] mb-6 rounded-full" aria-hidden="true" />
               <h2 className="text-4xl font-extrabold text-[#0A2647] tracking-tight mb-4">
                 The Gold Standard of Trust
               </h2>
               <p className="text-gray-500 max-w-xl font-light">
                 Vetted by industry experts. Trusted by 7,200+ students.
               </p>
-            </motion.div>
+            </div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 { icon: Shield, title: 'Employer Audit', description: 'Every company is vetted for legitimacy and work culture.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
                 { icon: Zap, title: 'Priority Access', description: 'Direct routes to HR. No middle-man delays.', color: 'text-blue-600', bg: 'bg-blue-50' },
-                { icon: Star, title: 'Smart Match', description: 'AI-driven matches based on your specific DU profile.', color: 'text-amber-600', bg: 'bg-amber-50' }
+                { icon: Star, title: 'Smart Match', description: 'AI-driven matches based on your specific profile.', color: 'text-amber-600', bg: 'bg-amber-50' }
               ].map((item, idx) => (
-                <motion.div key={idx} className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                <div key={idx} className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
                   <div className={`w-16 h-16 ${item.bg} rounded-2xl flex items-center justify-center mb-6`}>
-                    <item.icon className={item.color} size={32} />
+                    <item.icon className={item.color} size={32} aria-hidden="true" />
                   </div>
                   <h3 className="font-bold text-xl text-[#0A2647] mb-3">{item.title}</h3>
                   <p className="text-gray-500 text-sm leading-relaxed">{item.description}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -404,7 +362,7 @@ export default function Home() {
                 <div className="hidden lg:block">
                   <div className="bg-white/5 backdrop-blur-md border border-white/10 p-10 rounded-[2rem] flex items-center gap-6">
                     <div className="w-16 h-16 bg-[#FFD700] rounded-full flex items-center justify-center text-[#0A2647]">
-                      <Briefcase size={32} />
+                      <Briefcase size={32} aria-hidden="true" />
                     </div>
                     <div>
                       <p className="text-white text-xl font-bold">94% Success Rate</p>
