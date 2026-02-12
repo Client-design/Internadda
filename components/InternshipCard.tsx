@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/auth-context'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface InternshipCardProps {
   id: string
@@ -19,6 +20,9 @@ interface InternshipCardProps {
   applicants: number
   isRecommended?: boolean
   image?: string
+  // Added fields to match the advanced card style on home page
+  otherCompaniesCount?: number
+  companyLogos?: string[]
 }
 
 export function InternshipCard({
@@ -32,125 +36,130 @@ export function InternshipCard({
   applicants,
   isRecommended,
   image,
+  otherCompaniesCount = 0,
+  companyLogos = []
 }: InternshipCardProps) {
   const { user } = useAuth()
   const [isApplying, setIsApplying] = useState(false)
 
   const handleApply = async () => {
     if (!user) {
-      // Redirect to sign in if not logged in
       window.location.href = '/auth/signin'
       return
     }
 
     setIsApplying(true)
     try {
-      // Here you would make an API call to record the application
-      // For now, we'll just show a success message
+      // API call logic would go here
       console.log(`Applied to ${title} at ${company}`)
-      // You can add toast notification here
     } finally {
       setIsApplying(false)
     }
   }
 
   return (
-    <motion.div
-      className="relative group rounded-lg border border-border bg-card overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3 }}
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="bg-white rounded-[2.5rem] border border-blue-50 shadow-xl overflow-hidden w-full max-w-[420px] flex flex-col group transition-all duration-300 hover:shadow-2xl hover:border-blue-200"
     >
-      {/* Recommended Badge */}
-      {isRecommended && (
-        <div className="absolute top-4 right-4 z-10">
-          <Badge className="bg-accent text-accent-foreground">Recommended</Badge>
+      {/* Hero Image Section */}
+      <div className="relative h-56 w-full bg-gray-100 overflow-hidden">
+        <Image 
+          src={image || "/placeholder.svg"} 
+          alt={`${title} at ${company}`} 
+          fill 
+          sizes="(max-width: 768px) 100vw, 420px"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        
+        {/* Applied/Trending Badge */}
+        <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20 z-10">
+          <span className="text-orange-500 text-xs">🔥</span>
+          <span className="text-white text-[10px] font-bold tracking-tight">{applicants} Applied</span>
         </div>
-      )}
 
-      {/* Image Container */}
-      <div className="relative h-32 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden flex items-center justify-center">
-        {image ? (
-          <img src={image || "/placeholder.svg"} alt={company} className="w-full h-full object-cover" />
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-1">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="font-bold text-lg text-primary">
-                {company.charAt(0).toUpperCase()}
-              </span>
+        {isRecommended && (
+          <div className="absolute top-4 left-4 z-10">
+            <Badge className="bg-[#FFD700] text-[#0A2647] border-none font-bold">RECOMMENDED</Badge>
+          </div>
+        )}
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+      </div>
+
+      {/* Content Section */}
+      <div className="px-8 pb-8 pt-2 flex flex-col items-center text-center">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+          HIRING AT {company} {otherCompaniesCount > 0 && `& ${otherCompaniesCount} OTHERS`}
+        </p>
+
+        {/* Company Logo Stack & Count (If available) */}
+        {companyLogos.length > 0 && (
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex -space-x-3">
+              {companyLogos.slice(0, 3).map((logo, idx) => (
+                <div key={idx} className="relative w-9 h-9 rounded-full border-2 border-white bg-white shadow-sm overflow-hidden">
+                  <Image src={logo} alt="Partner" fill className="object-cover" />
+                </div>
+              ))}
             </div>
-            <p className="text-xs font-semibold text-muted-foreground text-center px-3">{company}</p>
+            {otherCompaniesCount > 0 && (
+              <span className="text-blue-600 text-[13px] font-bold">+{otherCompaniesCount} more companies</span>
+            )}
           </div>
         )}
 
-        {/* Applicants Badge */}
-        <div className="absolute top-4 left-4">
-          <Badge variant="secondary" className="bg-background/90 text-foreground">
-            <Zap size={14} className="mr-1" />
-            {applicants} Applied
-          </Badge>
-        </div>
-      </div>
+        <h3 className="text-2xl font-extrabold text-[#0A2647] mb-6 leading-snug group-hover:text-blue-700 transition-colors">
+          {title}
+        </h3>
 
-      {/* Content */}
-      <div className="p-3 space-y-3">
-        {/* Verified Badge & Title */}
-        <div>
-          <div className="flex items-start gap-2 mb-1">
-            <h3 className="font-bold text-sm text-foreground leading-tight flex-1">{title}</h3>
-            <CheckCircle2 size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
+        {/* Stipend & Location Grid */}
+        <div className="grid grid-cols-2 w-full border-y border-gray-100 py-5 mb-6">
+          <div className="border-r border-gray-100 flex flex-col items-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Stipend</p>
+            <p className="text-blue-600 font-extrabold text-base">{stipend}</p>
           </div>
-          <p className="text-xs text-muted-foreground">{company}</p>
-        </div>
-
-        {/* Stipend */}
-        <div className="flex items-baseline gap-1">
-          <p className="text-sm font-bold text-primary">{stipend}</p>
-          <p className="text-xs text-muted-foreground">/mo</p>
-        </div>
-
-        {/* Details Row */}
-        <div className="flex items-center gap-3 text-xs border-t border-border pt-2">
-          <div className="flex items-center gap-1">
-            <MapPin size={14} className="text-secondary flex-shrink-0" />
-            <span className="text-muted-foreground">{location}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <BookOpen size={14} className="text-secondary flex-shrink-0" />
-            <span className="text-muted-foreground">{duration}</span>
+          <div className="flex flex-col items-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Location</p>
+            <p className="text-gray-700 font-extrabold text-base">{location}</p>
           </div>
         </div>
 
-        {/* Skills */}
-        <div className="flex flex-wrap gap-1">
-          {skills.slice(0, 2).map((skill) => (
-            <Badge key={skill} variant="secondary" className="text-xs bg-primary/10 text-primary px-2 py-0.5">
-              {skill}
-            </Badge>
-          ))}
-          {skills.length > 2 && (
-            <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground px-2 py-0.5">
-              +{skills.length - 2}
-            </Badge>
-          )}
+        {/* Skills Required */}
+        <div className="w-full mb-8">
+          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest">Skills Required</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {skills.map((skill) => (
+              <span key={skill} className="bg-gray-50 border border-gray-100 px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600">
+                {skill}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Apply Button */}
+        {/* Dynamic Apply Button */}
         {user ? (
-          <Button
+          <Button 
             onClick={handleApply}
             disabled={isApplying}
-            className="w-full bg-foreground text-background hover:bg-foreground/90 font-bold text-sm rounded-lg mt-2 h-9"
+            className="w-full bg-[#0A2647] hover:bg-[#144272] text-white py-8 rounded-[1.25rem] font-extrabold text-lg shadow-lg shadow-blue-900/10 transition-all active:scale-95"
           >
             {isApplying ? 'Applying...' : 'Apply Now'}
           </Button>
         ) : (
-          <Link href="/auth/signin" className="block">
-            <Button className="w-full bg-foreground text-background hover:bg-foreground/90 font-bold text-sm rounded-lg mt-2 h-9">
+          <Link href="/auth/signin" className="w-full">
+            <Button className="w-full bg-[#0A2647] hover:bg-[#144272] text-white py-8 rounded-[1.25rem] font-extrabold text-lg shadow-lg shadow-blue-900/10 transition-all active:scale-95">
               Sign In to Apply
             </Button>
           </Link>
         )}
+        
+        <p className="text-[10px] text-gray-400 font-semibold mt-5 uppercase tracking-widest">
+           {duration} <span className="mx-1">•</span> AI Interviews
+        </p>
       </div>
-    </motion.div>
+    </motion.article>
   )
 }
