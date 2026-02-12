@@ -4,11 +4,11 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TrustBadges } from '@/components/TrustBadges'
 import { InternshipCard } from '@/components/InternshipCard'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, TrendingUp, Users, Briefcase, CheckCircle, Star, Shield, Clock, ChevronLeft, ChevronRight, GraduationCap, Award, BookOpen, MapPin, Calendar, IndianRupee } from 'lucide-react'
+import { ArrowRight, Users, CheckCircle, Shield, Clock, GraduationCap, Award } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -24,7 +24,6 @@ const staggerContainer = {
   viewport: { once: true },
 }
 
-// Featured internship data with proper images
 const featuredInternships = [
   {
     id: '1',
@@ -65,34 +64,10 @@ const featuredInternships = [
 ]
 
 const trustMetrics = [
-  {
-    icon: Shield,
-    title: '100% VERIFIED',
-    value: '500+ Companies',
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50'
-  },
-  {
-    icon: Users,
-    title: 'ACTIVE STUDENTS',
-    value: '7,200+',
-    color: 'text-blue-600',
-    bg: 'bg-blue-50'
-  },
-  {
-    icon: Award,
-    title: 'Verified Internship',
-    value: 'Since 2020',
-    color: 'text-amber-600',
-    bg: 'bg-amber-50'
-  },
-  {
-    icon: Clock,
-    title: 'AVG. HIRING',
-    value: '48 Hours',
-    color: 'text-purple-600',
-    bg: 'bg-purple-50'
-  },
+  { icon: Shield, title: '100% VERIFIED', value: '500+ Companies' },
+  { icon: Users, title: 'ACTIVE STUDENTS', value: '7,200+' },
+  { icon: Award, title: 'Verified Internship', value: 'Since 2020' },
+  { icon: Clock, title: 'AVG. HIRING', value: '48 Hours' },
 ]
 
 const partners = [
@@ -125,15 +100,14 @@ export default function Home() {
     <>
       <Header />
       <main className="min-h-screen bg-white">
-        {/* Trust Badge Strip - Navy Blue */}
+        {/* Trust Badge Strip */}
         <div className="bg-[#0A2647] text-white py-2">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-center">
               <div className="flex items-center gap-2">
                 <CheckCircle size={14} className="text-[#FFD700]" />
                 <span>Global Recognition</span>
               </div>
-
               <div className="flex items-center gap-2">
                 <GraduationCap size={14} className="text-[#FFD700]" />
                 <span>MSME REGISTERED</span>
@@ -142,41 +116,46 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero Section - Clean Navy & White */}
+        {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-[#0A2647] to-[#144272]">
-          <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-16 md:py-24">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left Content */}
+              {/* Left Content - Center aligned for mobile */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
+                className="text-center lg:text-left flex flex-col items-center lg:items-start"
               >
-                <Badge className="bg-[#FFD700]/20 text-[#FFD700] border-[#FFD700]/30 px-4 py-2 rounded-full mb-6">
+                <Badge className="bg-[#FFD700]/20 text-[#FFD700] border-[#FFD700]/30 px-4 py-2 rounded-full mb-6 w-fit">
                   India's #1 Internship Platform
                 </Badge>
                 
-                <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">
+                <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">
                   Launch Your Career with{' '}
                   <span className="text-[#FFD700]">Verified Internships</span>
                 </h1>
                 
-                <p className="text-lg text-gray-300 mb-8">
+                <p className="text-lg text-gray-300 mb-8 max-w-xl">
                   7,200+ students placed • 500+ verified companies • AI interviews
                 </p>
 
-                <div className="flex flex-wrap gap-4 mb-8">
-                  <Button className="bg-[#FFD700] text-[#0A2647] hover:bg-[#FFD700]/90 font-semibold px-8 py-6 text-base rounded-lg">
-                    Find Internships
-                    <ArrowRight className="ml-2" size={20} />
-                  </Button>
-                  <Button variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-base rounded-lg bg-transparent">
-                    For Employers
-                  </Button>
+                {/* 1. Redirects: Find Internships -> /internships | Explore Courses -> /courses */}
+                <div className="flex flex-wrap gap-4 mb-8 justify-center lg:justify-start">
+                  <Link href="/internships">
+                    <Button className="bg-[#FFD700] text-[#0A2647] hover:bg-[#FFD700]/90 font-semibold px-8 py-6 text-base rounded-lg">
+                      Find Internships
+                      <ArrowRight className="ml-2" size={20} />
+                    </Button>
+                  </Link>
+                  <Link href="/courses">
+                    <Button variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-base rounded-lg bg-transparent">
+                      Explore Courses
+                    </Button>
+                  </Link>
                 </div>
 
-                {/* Student Count */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 justify-center">
                   <div className="flex -space-x-3">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0A2647] overflow-hidden bg-gray-200">
@@ -192,7 +171,7 @@ export default function Home() {
 
               {/* Right Visual */}
               <motion.div
-                className="relative h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+                className="relative h-96 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6 }}
@@ -218,9 +197,9 @@ export default function Home() {
               </motion.div>
             </div>
 
-            {/* Trust Metrics */}
+            {/* Trust Metrics - Enlarge width */}
             <motion.div
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-white/10"
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-white/10 text-center"
               variants={staggerContainer}
               initial="initial"
               animate="whileInView"
@@ -228,10 +207,10 @@ export default function Home() {
               {trustMetrics.map((metric) => {
                 const Icon = metric.icon
                 return (
-                  <motion.div key={metric.title} variants={fadeInUp} className="text-white">
-                    <Icon className="text-[#FFD700] mb-2" size={24} />
-                    <p className="text-xl font-bold">{metric.value}</p>
-                    <p className="text-xs text-gray-400">{metric.title}</p>
+                  <motion.div key={metric.title} variants={fadeInUp} className="text-white flex flex-col items-center">
+                    <Icon className="text-[#FFD700] mb-2" size={28} />
+                    <p className="text-2xl font-bold">{metric.value}</p>
+                    <p className="text-xs text-gray-400 uppercase tracking-widest">{metric.title}</p>
                   </motion.div>
                 )
               })}
@@ -239,15 +218,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Partner Strip - Light Gray */}
-        <div className="bg-gray-50 py-6 border-y border-gray-200">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-              <p className="text-sm font-semibold text-gray-500">TRUSTED BY</p>
+        {/* Partner Strip */}
+        <div className="bg-gray-50 py-8 border-y border-gray-200">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Trusted by Institutions</p>
               {partners.map((partner, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <span className="text-2xl">{partner.logo}</span>
-                  <span className="font-medium text-gray-700">{partner.name}</span>
+                <div key={idx} className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all">
+                  <span className="text-3xl">{partner.logo}</span>
+                  <span className="font-bold text-gray-700">{partner.name}</span>
                 </div>
               ))}
             </div>
@@ -255,22 +234,22 @@ export default function Home() {
         </div>
 
         {/* Featured Internships */}
-        <section className="py-16 bg-white">
-          <div className="max-w-6xl mx-auto px-4">
-            <motion.div className="text-center mb-12" {...fadeInUp}>
+        <section className="py-20 bg-white">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+            <motion.div className="text-center mb-16" {...fadeInUp}>
               <Badge className="bg-[#0A2647] text-white px-4 py-2 rounded-full mb-4">
                 FEATURED OPPORTUNITIES
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#0A2647] mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold text-[#0A2647] mb-4">
                 Top Internships This Week
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-gray-600 max-w-2xl mx-auto text-lg">
                 Verified positions from India's fastest growing companies
               </p>
             </motion.div>
 
             <motion.div
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
               variants={staggerContainer}
               initial="initial"
               whileInView="whileInView"
@@ -283,67 +262,52 @@ export default function Home() {
               ))}
             </motion.div>
 
-            <div className="text-center mt-12">
-              <Button className="bg-[#0A2647] text-white hover:bg-[#0A2647]/90 px-8 py-6 rounded-lg">
-                View All 300+ Internships
-                <ArrowRight className="ml-2" size={20} />
-              </Button>
+            {/* 2. Update Label: View All 99+ | Redirect: /internships */}
+            <div className="text-center mt-16">
+              <Link href="/internships">
+                <Button className="bg-[#0A2647] text-white hover:bg-[#0A2647]/90 px-10 py-7 text-lg rounded-xl shadow-xl">
+                  View All 99+ Internships
+                  <ArrowRight className="ml-2" size={24} />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Quality Assurance - Clean Cards */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-6xl mx-auto px-4">
-            <motion.div className="text-center mb-12" {...fadeInUp}>
-              <Badge className="bg-[#FFD700] text-[#0A2647] px-4 py-2 rounded-full mb-4">
+        {/* Quality Assurance */}
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+            <motion.div className="text-center mb-16" {...fadeInUp}>
+              <Badge className="bg-[#FFD700] text-[#0A2647] px-4 py-2 rounded-full mb-4 font-bold">
                 WHY WE'RE DIFFERENT
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#0A2647] mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold text-[#0A2647]">
                 Quality You Can Trust
               </h2>
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                {
-                  icon: Shield,
-                  title: 'Manual Employer Audit',
-                  description: 'Every company verified through MCA/MSME records before listing',
-                  color: 'text-emerald-600',
-                  bg: 'bg-emerald-100'
-                },
-                {
-                  icon: CheckCircle,
-                  title: 'Direct Interview Routing',
-                  description: 'Your application reaches decision makers directly, no middlemen',
-                  color: 'text-blue-600',
-                  bg: 'bg-blue-100'
-                },
-                {
-                  icon: Award,
-                  title: 'Blockchain Certificates',
-                  description: 'Verified credentials recognized by 150+ global companies',
-                  color: 'text-amber-600',
-                  bg: 'bg-amber-100'
-                }
+                { icon: Shield, title: 'Manual Employer Audit', description: 'Every company verified through MCA/MSME records before listing', color: 'text-emerald-600', bg: 'bg-emerald-100' },
+                { icon: CheckCircle, title: 'Direct Interview Routing', description: 'Your application reaches decision makers directly, no middlemen', color: 'text-blue-600', bg: 'bg-blue-100' },
+                { icon: Award, title: 'Blockchain Certificates', description: 'Verified credentials recognized by 150+ global companies', color: 'text-amber-600', bg: 'bg-amber-100' }
               ].map((item, idx) => {
                 const Icon = item.icon
                 return (
                   <motion.div
                     key={idx}
-                    className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-                    whileHover={{ y: -4 }}
+                    className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all text-center flex flex-col items-center"
+                    whileHover={{ y: -10 }}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     viewport={{ once: true }}
                   >
-                    <div className={`w-14 h-14 ${item.bg} rounded-xl flex items-center justify-center mb-6`}>
-                      <Icon className={item.color} size={28} />
+                    <div className={`w-20 h-20 ${item.bg} rounded-2xl flex items-center justify-center mb-6`}>
+                      <Icon className={item.color} size={36} />
                     </div>
-                    <h3 className="font-bold text-lg text-[#0A2647] mb-3">{item.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                    <h3 className="font-bold text-2xl text-[#0A2647] mb-3">{item.title}</h3>
+                    <p className="text-gray-600 leading-relaxed text-lg">{item.description}</p>
                   </motion.div>
                 )
               })}
@@ -351,16 +315,16 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Recognition Carousel - Minimal */}
-        <section className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-4">
-            <motion.div className="text-center mb-8" {...fadeInUp}>
-              <Badge className="bg-[#0A2647] text-white px-4 py-2 rounded-full mb-4">
+        {/* Recognition Carousel */}
+        <section className="py-20 bg-white">
+          <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+            <motion.div className="text-center mb-12" {...fadeInUp}>
+              <Badge className="bg-[#0A2647] text-white px-4 py-2 rounded-full mb-4 font-bold">
                 INDUSTRY RECOGNITION
               </Badge>
             </motion.div>
 
-            <div className="bg-gradient-to-br from-[#0A2647] to-[#144272] rounded-2xl p-8 text-white">
+            <div className="bg-gradient-to-br from-[#0A2647] to-[#144272] rounded-3xl p-12 text-white shadow-2xl max-w-5xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={carouselIndex}
@@ -369,23 +333,23 @@ export default function Home() {
                   exit={{ opacity: 0, y: -10 }}
                   className="text-center"
                 >
-                  <p className="text-xl md:text-2xl font-medium italic mb-6">
+                  <p className="text-2xl md:text-3xl font-medium italic mb-8 leading-relaxed">
                     {globalPartners[carouselIndex].quote}
                   </p>
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-3xl">{globalPartners[carouselIndex].logo}</span>
-                    <span className="font-bold text-[#FFD700]">{globalPartners[carouselIndex].name}</span>
+                  <div className="flex items-center justify-center gap-4">
+                    <span className="text-5xl">{globalPartners[carouselIndex].logo}</span>
+                    <span className="text-2xl font-bold text-[#FFD700]">{globalPartners[carouselIndex].name}</span>
                   </div>
                 </motion.div>
               </AnimatePresence>
 
-              <div className="flex justify-center gap-2 mt-8">
+              <div className="flex justify-center gap-3 mt-12">
                 {globalPartners.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCarouselIndex(idx)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      idx === carouselIndex ? 'bg-[#FFD700] w-6' : 'bg-white/30'
+                    className={`h-2 rounded-full transition-all ${
+                      idx === carouselIndex ? 'bg-[#FFD700] w-12' : 'bg-white/30 w-3'
                     }`}
                   />
                 ))}
@@ -394,24 +358,28 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Final CTA - Navy & Gold */}
-        <section className="py-20 bg-[#0A2647]">
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <motion.div {...fadeInUp}>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+        {/* Final CTA */}
+        <section className="py-24 bg-[#0A2647]">
+          <div className="max-w-[1400px] mx-auto px-4 text-center">
+            <motion.div {...fadeInUp} className="flex flex-col items-center">
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
                 Ready to Start Your Journey?
               </h2>
-              <p className="text-xl text-gray-300 mb-8">
-                Join 7,200+ students who found their dream internship
+              <p className="text-xl text-gray-300 mb-10 max-w-2xl">
+                Join 7,200+ students who found their dream internship with InternAdda.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-[#FFD700] text-[#0A2647] hover:bg-[#FFD700]/90 font-semibold px-8 py-6 text-base rounded-lg">
-                  Browse Internships
-                  <ArrowRight className="ml-2" size={20} />
-                </Button>
-                <Button variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-base rounded-lg bg-transparent">
-                  Partner With Us
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-lg">
+                <Link href="/internships" className="flex-1">
+                  <Button className="w-full bg-[#FFD700] text-[#0A2647] hover:bg-[#FFD700]/90 font-bold px-8 py-7 text-lg rounded-xl shadow-2xl">
+                    Browse Internships
+                    <ArrowRight className="ml-2" size={24} />
+                  </Button>
+                </Link>
+                <Link href="/about" className="flex-1">
+                  <Button variant="outline" className="w-full border-2 border-white text-white hover:bg-white/10 px-8 py-7 text-lg rounded-xl bg-transparent">
+                    Partner With Us
+                  </Button>
+                </Link>
               </div>
             </motion.div>
           </div>
