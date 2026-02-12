@@ -80,7 +80,7 @@ const internships = [
     description: 'Manage social media campaigns and SEO.',
     skills: ['SEO', 'Content Writing', 'Ads'],
     applicants: 340,
-    image: '/marketing.jpg',
+    image: '/content.jpg',
     otherCompaniesCount: 45,
     companyLogos: ['/company3.jpg', '/company4.jpg', '/company1.jpg'],
   },
