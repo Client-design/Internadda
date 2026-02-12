@@ -133,7 +133,7 @@ const InternshipCard = ({ title, company, stipend, location, skills, applicants,
       </Button>
       
       <p className="text-[10px] text-gray-400 font-semibold mt-5 uppercase tracking-widest">
-        Next Batch Starts Soon <span className="mx-1">•</span> Direct Selection
+         Ending Soon <span className="mx-1">•</span> AI Interviews
       </p>
     </div>
   </div>
