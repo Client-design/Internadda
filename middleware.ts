@@ -35,17 +35,18 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Get current session
-  const { data: { session } } = await supabase.auth.getSession()
+  // IMPORTANT: getSession() ki jagah getUser() use kar rahe hain for better reliability
+  const { data: { user } } = await supabase.auth.getUser()
 
-  const isTestPage = request.nextUrl.pathname.startsWith('/test')
-  const isApplyPage = request.nextUrl.pathname.startsWith('/apply')
+  const { pathname } = request.nextUrl
+  const isProtectedPage = pathname.startsWith('/test') || pathname.startsWith('/apply')
 
-  // Protected Routes Logic: Agar session nahi hai aur user test ya apply page par hai
-  if ((isTestPage || isApplyPage) && !session) {
+  // Agar user logged in nahi hai aur protected page access kar raha hai
+  if (isProtectedPage && !user) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/auth/signin'
-    redirectUrl.searchParams.set('callbackUrl', request.nextUrl.pathname)
+    // callbackUrl set kar rahe hain taaki login ke baad wapas wahin aayein
+    redirectUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
@@ -53,5 +54,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Isme auth pages ko mat daalna taaki loop na bane
   matcher: ['/test/:path*', '/apply/:path*'],
 }
