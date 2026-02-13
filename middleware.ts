@@ -1,12 +1,10 @@
-// middleware.ts
+// middleware.ts update
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   })
 
   const supabase = createServerClient(
@@ -14,46 +12,38 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
+        get(name: string) { return request.cookies.get(name)?.value },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options })
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          })
+          response = NextResponse.next({ request: { headers: request.headers } })
           response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: '', ...options })
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          })
+          response = NextResponse.next({ request: { headers: request.headers } })
           response.cookies.set({ name, value: '', ...options })
         },
       },
     }
   )
 
-  // IMPORTANT: getSession() ki jagah getUser() use kar rahe hain for better reliability
+  // Session ko refresh karna zaroori hai middleware mein
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isProtectedPage = pathname.startsWith('/test') || pathname.startsWith('/apply')
+  
+  // Agar user logged in hai aur login page par jane ki koshish kare to home bhej do
+  if (user && pathname.startsWith('/auth')) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
 
-  // Agar user logged in nahi hai aur protected page access kar raha hai
+  // Protected pages check
+  const isProtectedPage = pathname.startsWith('/test') || pathname.startsWith('/apply')
   if (isProtectedPage && !user) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/auth/signin'
-    // callbackUrl set kar rahe hain taaki login ke baad wapas wahin aayein
+    const redirectUrl = new URL('/auth/signin', request.url)
     redirectUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
   return response
-}
-
-export const config = {
-  // Isme auth pages ko mat daalna taaki loop na bane
-  matcher: ['/test/:path*', '/apply/:path*'],
 }
