@@ -16,11 +16,9 @@ export default function InternshipAssessment() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
   
-  // Gatekeeper States
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [verifying, setVerifying] = useState(true)
 
-  // Test Logic States
   const testData = DOMAIN_TESTS[id as string] || DOMAIN_TESTS['1']
   const [currentIdx, setCurrentIdx] = useState(0)
   const [score, setScore] = useState(0)
@@ -28,14 +26,13 @@ export default function InternshipAssessment() {
   const [isFinished, setIsFinished] = useState(false)
   const [cheatingAttempts, setCheatingAttempts] = useState(0)
 
-  // --- 1. Gatekeeper: ONLY TOKEN VERIFICATION (No DB Fallback) ---
+  // --- 1. Gatekeeper: Token Verify & URL Hiding ---
   useEffect(() => {
     const verifyAccess = async () => {
       const params = new URLSearchParams(window.location.search)
       const token = params.get('token')
 
       if (!token) {
-        // No token = No access. No DB check performed.
         setIsAuthorized(false)
         setVerifying(false)
         return
@@ -46,11 +43,15 @@ export default function InternshipAssessment() {
         const tokenTime = parseInt(timestampStr)
         const currentTime = Math.floor(Date.now() / 1000)
 
-        // Token valid for 10 minutes (600s) to be safe
+        // Token valid for 10 minutes
         if (currentTime - tokenTime < 600) {
           setIsAuthorized(true)
+
+          // 🔥 URL Hiding: Token ko browser history aur URL se turant remove karein
+          // Isse user URL copy karega toh token nahi jayega
+          const cleanUrl = window.location.pathname
+          window.history.replaceState({}, '', cleanUrl)
           
-          // Background Sync: Update DB just for records, but don't wait for it
           if (user) {
             supabase.from('profiles').update({ has_paid: true }).eq('id', user.id).then(() => {})
           }
@@ -67,7 +68,7 @@ export default function InternshipAssessment() {
     verifyAccess()
   }, [user])
 
-  // --- 2. Anti-Cheating: 2 Attempts Limit ---
+  // --- 2. Anti-Cheating: 2 Attempts Logic with Reason ---
   useEffect(() => {
     if (!isAuthorized || isFinished) return
 
@@ -77,11 +78,12 @@ export default function InternshipAssessment() {
           const nextCount = prev + 1
           
           if (nextCount === 1) {
-            alert("WARNING (1/2): Tab switching detected! You are being monitored. If you switch tabs one more time, your test will be CANCELLED immediately for security reasons.")
+            alert("⚠️ WARNING (1/2): Tab switching detected!\n\nReason: Academic Integrity Policy.\nYour activity is being logged. Switching tabs again will lead to PERMANENT CANCELLATION of this session.")
           } else if (nextCount >= 2) {
-            alert("TEST TERMINATED: Multiple tab switches detected. You have violated the examination policy. Redirecting to home...")
-            router.push('/')
+            // Proper Reason Popup
+            alert("❌ TEST TERMINATED\n\nReason: Multiple violations of the Anti-Cheat policy (Tab Switching).\n\nAction: Your access has been revoked and your session is cancelled. You are being redirected to the home page.")
             setIsFinished(true)
+            router.push('/')
           }
           return nextCount
         })
@@ -113,52 +115,61 @@ export default function InternshipAssessment() {
 
   if (verifying) return <LoadingScreen />
 
-  // Access Denied UI
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0A2647] flex items-center justify-center p-6 text-white text-center">
-        <div>
-          <Lock size={48} className="mx-auto mb-4 text-yellow-400" />
-          <h1 className="text-2xl font-bold">Access Denied</h1>
-          <p className="mt-2 opacity-70">A valid payment token is required to view this assessment.</p>
-          <Button onClick={() => router.push('/internships')} className="mt-6 bg-yellow-500 text-black">Return to Internships</Button>
+        <div className="max-w-md">
+          <Lock size={60} className="mx-auto mb-6 text-yellow-400" />
+          <h1 className="text-3xl font-black mb-4 tracking-tight">Access Restricted</h1>
+          <p className="opacity-80 leading-relaxed">This assessment requires a valid, active payment token. It seems your session has expired or the link is invalid.</p>
+          <Button onClick={() => router.push('/internships')} className="mt-8 bg-yellow-500 hover:bg-yellow-600 text-[#0A2647] font-bold py-6 px-8 rounded-2xl">Return to Dashboard</Button>
         </div>
       </div>
     )
   }
 
-  // Success/Fail Screens
   if (isFinished) {
     const percentage = Math.round((score / testData.questions.length) * 100)
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center">
-        <div className="bg-white p-12 rounded-[2rem] shadow-xl max-w-md">
-           <h1 className="text-3xl font-black text-[#0A2647] mb-4">Assessment Result</h1>
-           <p className="text-4xl font-bold text-primary mb-4">{percentage}%</p>
-           <p className="mb-8">You scored {score} out of {testData.questions.length}.</p>
-           <Button onClick={() => router.push('/')} className="w-full">Back to Home</Button>
-        </div>
+        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white p-12 rounded-[3rem] shadow-2xl max-w-md border-t-8 border-[#0A2647]">
+           <h1 className="text-3xl font-black text-[#0A2647] mb-6">Test Completed</h1>
+           <div className="bg-slate-50 py-6 rounded-2xl mb-6">
+             <p className="text-5xl font-black text-primary">{percentage}%</p>
+             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Final Score</p>
+           </div>
+           <p className="text-gray-500 mb-8 font-medium">Results have been synced with your profile. Our team will contact you for the next steps.</p>
+           <Button onClick={() => router.push('/')} className="w-full py-7 rounded-2xl font-bold bg-[#0A2647]">Back to Dashboard</Button>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0A2647] p-4 md:p-12">
+    <div className="min-h-screen bg-[#0A2647] p-4 md:p-12 font-sans">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-10 bg-white/10 p-6 rounded-[2rem] text-white">
-          <div className="flex items-center gap-2">
-            <Timer />
-            <span className="text-2xl font-bold font-mono">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-10 bg-white/10 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/10 shadow-2xl text-white">
+          <div className="flex items-center gap-3">
+            <div className="bg-yellow-400 text-[#0A2647] p-2 rounded-xl">
+              <Timer size={24} />
+            </div>
+            <span className="text-2xl font-black font-mono tracking-tighter">
                {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-red-400 font-bold text-xs">
-            <ShieldAlert size={14} /> ANTI-CHEAT ACTIVE
+          <div className="flex items-center gap-2 text-red-400 font-black text-[10px] uppercase tracking-widest bg-red-500/10 px-4 py-2 rounded-full border border-red-500/20">
+            <ShieldAlert size={14} /> Monitoring Active
           </div>
         </div>
 
-        <div className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl">
-          <h2 className="text-2xl md:text-3xl font-black text-[#0A2647] mb-12">
+        {/* Question Card */}
+        <div className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border-none">
+          <div className="mb-10">
+             <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Question {currentIdx + 1} of {testData.questions.length}</p>
+             <Progress value={((currentIdx + 1) / testData.questions.length) * 100} className="h-1.5" />
+          </div>
+          <h2 className="text-2xl md:text-3xl font-black text-[#0A2647] mb-12 leading-tight">
             {testData.questions[currentIdx].q}
           </h2>
           <div className="grid gap-4">
@@ -166,9 +177,10 @@ export default function InternshipAssessment() {
               <button
                 key={i}
                 onClick={() => handleAnswer(i)}
-                className="w-full text-left p-6 rounded-2xl border-2 hover:border-[#0A2647] transition-all font-bold text-[#0A2647]"
+                className="w-full text-left p-6 rounded-2xl border-2 border-slate-50 hover:border-[#0A2647] hover:bg-slate-50 transition-all font-bold text-[#0A2647] active:scale-95 flex justify-between items-center group"
               >
-                {option}
+                <span>{option}</span>
+                <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-[#0A2647]" />
               </button>
             ))}
           </div>
