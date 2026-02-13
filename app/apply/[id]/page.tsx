@@ -71,8 +71,11 @@ export default function ApplyPage() {
     setIsProcessing(true)
     try {
       const origin = window.location.origin;
+      
+      // Updated returnUrl: payment ke baad seedha test page khulega
+      const returnUrl = `${origin}/test/${id}`;
 
-      const response = await fetch(`${origin}/payment/create-order`, {
+      const response = await fetch(`${origin}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -83,7 +86,8 @@ export default function ApplyPage() {
           internshipId: id,
           college: college,
           education: education,
-          couponCode: appliedCoupon?.code || null
+          couponCode: appliedCoupon?.code || null,
+          returnUrl: returnUrl // Sending the test page link
         })
       });
 
