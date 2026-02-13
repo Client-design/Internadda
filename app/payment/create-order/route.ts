@@ -3,17 +3,16 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    // Added internshipId to body to ensure we redirect to the correct test page
+    // body se internshipId nikalna zaroori hai redirect ke liye
     const { amount, customerId, customerName, customerEmail, internshipId } = body;
 
-    // Use Production URL if env is set to PRODUCTION, otherwise use Sandbox
     const isProduction = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PRODUCTION';
     const baseUrl = isProduction 
       ? 'https://api.cashfree.com/pg/orders' 
       : 'https://sandbox.cashfree.com/pg/orders';
 
-    // 1. Generate a security token identical to the one used in your client-side logic
-    // This token is valid for 5 minutes as per your middleware.ts logic
+    // --- BYPASS TOKEN GENERATION ---
+    // Middleware Layer 1 isi format ka wait kar raha hai
     const timestamp = Math.floor(Date.now() / 1000);
     const randomString = Math.random().toString(36).substring(7);
     const secureToken = `${timestamp}_${randomString}`;
@@ -36,9 +35,8 @@ export async function POST(req: Request) {
           customer_phone: "9999999999" 
         },
         order_meta: {
-          // 2. Updated return_url to point directly to the test page with the bypass token
-          // This ensures the middleware lets them through without asking for sign-in
-          return_url: `${req.headers.get('origin')}/test/${internshipId || '1'}?token=${secureToken}&order_id={order_id}`
+          // Return URL ko update kiya taaki directly test page par jaye with token
+          return_url: `${req.headers.get('origin')}/test/${internshipId || '1'}?token=${secureToken}`
         }
       })
     });
