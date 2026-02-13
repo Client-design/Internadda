@@ -39,9 +39,9 @@ export default function SignUpPage() {
 
     try {
       await signUp(email, password, fullName)
-      // Fix: 404 verify-email ki jagah direct success message aur home redirect
+      // Signup success ke baad home page redirect
       router.push('/?signup=success')
-      router.refresh() // Auth state update karne ke liye
+      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account')
     } finally {
@@ -51,11 +51,10 @@ export default function SignUpPage() {
 
   return (
     <>
-      {/* SEO Meta Tags handled via layout or can be added here if using a wrapper */}
       <Header />
       <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center py-16 px-4">
         
-        {/* Trust Badges - User Growth & SEO UI */}
+        {/* Trust Badges */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -77,25 +76,18 @@ export default function SignUpPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-2xl shadow-blue-900/5"
           >
-            {/* Header */}
             <div className="mb-10 text-center">
               <h1 className="text-4xl font-black text-[#0A2647] mb-3 tracking-tight">Create Account</h1>
               <p className="text-slate-500 font-medium">Start your professional journey with InternAdda</p>
             </div>
 
-            {/* Error Message */}
             {error && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3"
-              >
+              <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
                 <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
                 <p className="text-sm text-red-600 font-medium">{error}</p>
-              </motion.div>
+              </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSignUp} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
@@ -107,7 +99,7 @@ export default function SignUpPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50 font-medium"
+                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 bg-slate-50/50 font-medium"
                   />
                 </div>
               </div>
@@ -122,86 +114,65 @@ export default function SignUpPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50 font-medium"
+                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 bg-slate-50/50 font-medium"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-5">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Create Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Terms */}
-              <div className="flex items-start gap-3 py-2">
-                <div className="mt-1">
-                  <input
-                    type="checkbox"
-                    id="terms"
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 bg-slate-50/50"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 bg-slate-50/50"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 py-2">
+                <input type="checkbox" id="terms" required className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600" />
                 <label htmlFor="terms" className="text-[11px] text-slate-500 leading-snug font-medium">
-                  I agree to the <Link href="/terms" className="text-blue-600 font-bold hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-blue-600 font-bold hover:underline">Privacy Policy</Link>
+                  I agree to the <Link href="/terms" className="text-blue-600 font-bold hover:underline">Terms</Link> and <Link href="/privacy" className="text-blue-600 font-bold hover:underline">Privacy Policy</Link>
                 </label>
               </div>
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#0A2647] hover:bg-[#144272] text-white h-14 rounded-2xl font-bold text-lg shadow-xl shadow-blue-900/10 transition-all active:scale-[0.98] disabled:opacity-70"
+                className="w-full bg-[#0A2647] hover:bg-[#144272] text-white h-14 rounded-2xl font-bold text-lg transition-all"
               >
-                {loading ? (
-                  <span className="flex items-center gap-2 italic">
-                    Setting up your profile...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Join InternAdda Now <CheckCircle size={20} />
-                  </span>
-                )}
+                {loading ? "Setting up..." : <span className="flex items-center gap-2">Join InternAdda Now <CheckCircle size={20} /></span>}
               </Button>
             </form>
 
-            {/* Divider */}
             <div className="my-8 flex items-center gap-4">
               <div className="flex-1 h-[1px] bg-slate-100" />
               <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Already a Member?</p>
               <div className="flex-1 h-[1px] bg-slate-100" />
             </div>
 
-            {/* Sign In Link */}
             <Link href="/auth/signin">
-              <Button variant="outline" className="w-full h-14 rounded-2xl font-bold border-slate-200 text-[#0A2647] hover:bg-slate-50 bg-transparent transition-all">
+              <Button variant="outline" className="w-full h-14 rounded-2xl font-bold border-slate-200 text-[#0A2647] bg-transparent">
                 Sign In to Your Account
               </Button>
             </Link>
