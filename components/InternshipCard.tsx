@@ -1,10 +1,12 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 
 interface InternshipCardProps {
@@ -38,20 +40,47 @@ export function InternshipCard({
 }: InternshipCardProps) {
   const { user } = useAuth()
   const router = useRouter()
+  const [hasPaid, setHasPaid] = useState<boolean | null>(null)
+
+  // Check if the user has already paid for this specific assessment
+  useEffect(() => {
+    async function checkPaymentStatus() {
+      if (!user) return
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('test_id', id)
+        .eq('status', 'PAID')
+        .maybeSingle()
+
+      if (!error && data) {
+        setHasPaid(true)
+      } else {
+        setHasPaid(false)
+      }
+    }
+
+    checkPaymentStatus()
+  }, [user, id])
 
   const handleApply = (e: React.MouseEvent) => {
-    // ESSENTIAL: Stops the click from "bubbling up" to any parent card/link components
     e.preventDefault()
     e.stopPropagation()
 
     if (!user) {
-      // Redirect to signin with a return path to this specific application
       router.push(`/auth/signin?callbackUrl=/apply/${id}`)
       return
     }
 
-    // Direct to the personalized, center-aligned application page
-    router.push(`/apply/${id}`)
+    // If paid, go straight to the assessment
+    // If not, go to the application page to process payment
+    if (hasPaid) {
+      router.push(`/test/${id}`)
+    } else {
+      router.push(`/apply/${id}`)
+    }
   }
 
   return (
@@ -83,11 +112,10 @@ export function InternshipCard({
           </div>
         )}
         
-        {/* Gradient overlay to blend image with content */}
+        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none" />
       </div>
 
-      {/* Content Section - Added relative z-10 to ensure interactivity */}
       <div className="px-8 pb-8 pt-2 flex flex-col items-center text-center relative z-10">
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
           HIRING AT {company} {otherCompaniesCount > 0 && `& ${otherCompaniesCount} OTHERS`}
@@ -137,13 +165,13 @@ export function InternshipCard({
           </div>
         </div>
 
-        {/* CLICKABLE APPLY BUTTON */}
+        {/* Action Button */}
         <Button 
           type="button"
           onClick={handleApply}
           className="relative z-20 w-full bg-[#0A2647] hover:bg-[#144272] text-white py-8 rounded-[1.25rem] font-extrabold text-lg shadow-lg shadow-blue-900/10 transition-all active:scale-95 cursor-pointer"
         >
-          {user ? 'Apply Now' : 'Sign In to Apply'}
+          {!user ? 'Sign In to Apply' : hasPaid ? 'Start Assessment' : 'Apply Now'}
         </Button>
         
         <p className="text-[10px] text-gray-400 font-semibold mt-5 uppercase tracking-widest flex items-center gap-2">
