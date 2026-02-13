@@ -2,19 +2,16 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Initial response object
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
-  // Verify environment variables exist to prevent 500 error
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing Supabase environment variables")
     return response
   }
 
@@ -29,18 +26,14 @@ export async function middleware(request: NextRequest) {
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options })
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           })
           response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: '', ...options })
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           })
           response.cookies.set({ name, value: '', ...options })
         },
@@ -48,15 +41,16 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - Important for Gatekeeper
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Guard: Only apply to /test routes
+  // FIX: Agar user /test path par ja raha hai
   if (request.nextUrl.pathname.startsWith('/test')) {
+    // Agar session nahi hai, tabhi signin par bhejo
     if (!session) {
-      // Redirect to signin if no session found
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = '/auth/signin'
+      // Login ke baad wapas isi test page par aane ke liye returnTo set karein
+      redirectUrl.searchParams.set('returnTo', request.nextUrl.pathname)
       return NextResponse.redirect(redirectUrl)
     }
   }
