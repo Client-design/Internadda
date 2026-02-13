@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
+import { useAuth } from '@/lib/auth-context'
+import { useRouter } from 'next/navigation'
 
 interface Internship {
   id: number;
@@ -21,63 +23,84 @@ interface Internship {
   companyLogos: string[];
 }
 
-const InternshipCard = ({ internship }: { internship: Internship }) => (
-  <article className="bg-white rounded-[2rem] border border-blue-50 shadow-lg overflow-hidden w-full max-w-[380px] flex flex-col group transition-all duration-300 hover:shadow-2xl hover:border-blue-200">
-    <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
-      <Image 
-        src={internship.image} 
-        alt={internship.title} 
-        fill 
-        className="object-cover group-hover:scale-105 transition-transform duration-500"
-      />
-      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20">
-        <span className="text-orange-500 text-[10px]">🔥</span>
-        <span className="text-white text-[9px] font-bold">{internship.applicants} Applied</span>
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
-    </div>
+const InternshipCard = ({ internship }: { internship: Internship }) => {
+  const { user } = useAuth()
+  const router = useRouter()
 
-    <div className="px-6 pb-6 pt-1 flex flex-col items-center text-center">
-      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-3">HIRING AT {internship.company}</p>
-      
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <div className="flex -space-x-2">
-          {internship.companyLogos.map((logo, idx) => (
-            <div key={idx} className="relative w-7 h-7 rounded-full border-2 border-white bg-white overflow-hidden shadow-sm">
-              <Image src={logo} alt="logo" fill className="object-cover" />
-            </div>
+  const handleApply = (e: React.MouseEvent) => {
+    // Prevent any parent click events
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!user) {
+      router.push(`/auth/signin?callbackUrl=/apply/${internship.id}`)
+      return
+    }
+    router.push(`/apply/${internship.id}`)
+  }
+
+  return (
+    <article className="bg-white rounded-[2rem] border border-blue-50 shadow-lg overflow-hidden w-full max-w-[380px] flex flex-col group transition-all duration-300 hover:shadow-2xl hover:border-blue-200">
+      <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
+        <Image 
+          src={internship.image} 
+          alt={internship.title} 
+          fill 
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20 z-10">
+          <span className="text-orange-500 text-[10px]">🔥</span>
+          <span className="text-white text-[9px] font-bold">{internship.applicants} Applied</span>
+        </div>
+        {/* pointer-events-none ensures this gradient doesn't block clicks */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none" />
+      </div>
+
+      <div className="px-6 pb-6 pt-1 flex flex-col items-center text-center relative z-10">
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-3">HIRING AT {internship.company}</p>
+        
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="flex -space-x-2">
+            {internship.companyLogos.map((logo, idx) => (
+              <div key={idx} className="relative w-7 h-7 rounded-full border-2 border-white bg-white overflow-hidden shadow-sm">
+                <Image src={logo} alt="logo" fill className="object-cover" />
+              </div>
+            ))}
+          </div>
+          <span className="text-blue-600 text-[11px] font-bold">+{internship.otherCompaniesCount} more</span>
+        </div>
+
+        <h3 className="text-xl font-extrabold text-[#0A2647] mb-4 leading-tight">{internship.title}</h3>
+
+        <div className="grid grid-cols-2 w-full border-y border-gray-100 py-3 mb-4">
+          <div className="border-r border-gray-100 flex flex-col items-center">
+            <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Stipend</p>
+            <p className="text-blue-600 font-extrabold text-sm">{internship.stipend}</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Location</p>
+            <p className="text-gray-700 font-extrabold text-sm">{internship.location}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-1.5 mb-6">
+          {internship.skills.map((skill) => (
+            <span key={skill} className="bg-gray-50 border border-gray-100 px-3 py-1 rounded-lg text-[10px] font-bold text-gray-600">
+              {skill}
+            </span>
           ))}
         </div>
-        <span className="text-blue-600 text-[11px] font-bold">+{internship.otherCompaniesCount} more</span>
+
+        <Button 
+          onClick={handleApply}
+          className="w-full bg-[#0A2647] hover:bg-[#144272] text-white py-6 rounded-xl font-extrabold shadow-lg transition-all active:scale-95 cursor-pointer relative z-20"
+        >
+          {user ? 'Apply Now' : 'Sign In to Apply'}
+        </Button>
       </div>
-
-      <h3 className="text-xl font-extrabold text-[#0A2647] mb-4 leading-tight">{internship.title}</h3>
-
-      <div className="grid grid-cols-2 w-full border-y border-gray-50 py-3 mb-4">
-        <div className="border-r border-gray-100 flex flex-col items-center">
-          <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Stipend</p>
-          <p className="text-blue-600 font-extrabold text-sm">{internship.stipend}</p>
-        </div>
-        <div className="flex flex-col items-center">
-          <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Location</p>
-          <p className="text-gray-700 font-extrabold text-sm">{internship.location}</p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-1.5 mb-6">
-        {internship.skills.map((skill) => (
-          <span key={skill} className="bg-gray-50 border border-gray-100 px-3 py-1 rounded-lg text-[10px] font-bold text-gray-600">
-            {skill}
-          </span>
-        ))}
-      </div>
-
-      <Button className="w-full bg-[#0A2647] hover:bg-[#144272] text-white py-6 rounded-xl font-extrabold shadow-lg transition-all active:scale-95">
-        Apply Now
-      </Button>
-    </div>
-  </article>
-)
+    </article>
+  )
+}
 
 export default function InternshipsClient({ initialInternships }: { initialInternships: Internship[] }) {
   const [searchTerm, setSearchTerm] = useState('')
@@ -93,7 +116,6 @@ export default function InternshipsClient({ initialInternships }: { initialInter
 
   return (
     <div className="flex flex-col items-center">
-      {/* Trust Strip */}
       <div className="w-full bg-[#0A2647] text-white py-2">
         <div className="flex justify-center gap-6 text-[10px] uppercase tracking-widest font-medium">
           <div className="flex items-center gap-2"><CheckCircle size={12} className="text-[#FFD700]" /> Global Recognition</div>
@@ -101,7 +123,6 @@ export default function InternshipsClient({ initialInternships }: { initialInter
         </div>
       </div>
 
-      {/* Hero / Search */}
       <section className="w-full bg-gradient-to-br from-[#0A2647] to-[#144272] py-16 px-4">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
           <Badge className="bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20 px-4 py-1.5 rounded-full mb-6">
@@ -117,7 +138,7 @@ export default function InternshipsClient({ initialInternships }: { initialInter
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value)
-                setVisibleCount(6) // Reset visible count on search
+                setVisibleCount(6)
               }}
               className="pl-12 py-7 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 rounded-2xl w-full"
             />
@@ -125,7 +146,6 @@ export default function InternshipsClient({ initialInternships }: { initialInter
         </div>
       </section>
 
-      {/* Grid */}
       <section className="py-20 w-full max-w-[1400px] px-4">
         {displayedInternships.length > 0 ? (
           <div className="flex flex-col items-center">
@@ -146,12 +166,14 @@ export default function InternshipsClient({ initialInternships }: { initialInter
               </AnimatePresence>
             </div>
 
-            {/* Load More Button */}
             {visibleCount < filteredInternships.length && (
               <div className="mt-16">
                 <Button 
-                  onClick={() => setVisibleCount(prev => prev + 3)}
-                  className="bg-[#0A2647] hover:bg-black text-white px-10 py-7 text-base font-bold rounded-2xl shadow-xl transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setVisibleCount(prev => prev + 3)
+                  }}
+                  className="bg-[#0A2647] hover:bg-black text-white px-10 py-7 text-base font-bold rounded-2xl shadow-xl transition-all cursor-pointer relative z-20"
                 >
                   Load More Internships <ArrowRight className="ml-2" size={20} />
                 </Button>
