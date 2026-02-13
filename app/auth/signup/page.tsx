@@ -1,8 +1,6 @@
 'use client'
 
-import React from "react"
-
-import { useState } from 'react'
+import React, { useState } from "react"
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Header } from '@/components/Header'
@@ -10,7 +8,8 @@ import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/auth-context'
-import { User, Mail, Lock, AlertCircle } from 'lucide-react'
+import { User, Mail, Lock, AlertCircle, Zap, ShieldCheck, CheckCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export default function SignUpPage() {
   const [fullName, setFullName] = useState('')
@@ -40,7 +39,9 @@ export default function SignUpPage() {
 
     try {
       await signUp(email, password, fullName)
-      router.push('/auth/verify-email')
+      // Fix: 404 verify-email ki jagah direct success message aur home redirect
+      router.push('/?signup=success')
+      router.refresh() // Auth state update karne ke liye
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account')
     } finally {
@@ -50,101 +51,126 @@ export default function SignUpPage() {
 
   return (
     <>
+      {/* SEO Meta Tags handled via layout or can be added here if using a wrapper */}
       <Header />
-      <main className="min-h-screen bg-background flex items-center justify-center py-12 px-4">
+      <main className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center py-16 px-4">
+        
+        {/* Trust Badges - User Growth & SEO UI */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex flex-wrap justify-center gap-4"
+        >
+          <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-blue-100 flex items-center gap-2">
+            <Zap size={16} className="text-blue-600 fill-blue-600" />
+            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">Join 10,000+ Students</span>
+          </div>
+          <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-green-100 flex items-center gap-2">
+            <ShieldCheck size={16} className="text-green-600" />
+            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">MSME Verified Portal</span>
+          </div>
+        </motion.div>
+
         <div className="w-full max-w-md">
-          {/* Card */}
-          <div className="bg-card border border-border rounded-lg p-8 shadow-lg">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-2xl shadow-blue-900/5"
+          >
             {/* Header */}
-            <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold text-foreground mb-2">Get Started</h1>
-              <p className="text-muted-foreground">Create your InternAdda account</p>
+            <div className="mb-10 text-center">
+              <h1 className="text-4xl font-black text-[#0A2647] mb-3 tracking-tight">Create Account</h1>
+              <p className="text-slate-500 font-medium">Start your professional journey with InternAdda</p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3">
-                <AlertCircle className="text-destructive flex-shrink-0 mt-0.5" size={20} />
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3"
+              >
+                <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+                <p className="text-sm text-red-600 font-medium">{error}</p>
+              </motion.div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSignUp} className="space-y-4">
-              {/* Full Name */}
+            <form onSubmit={handleSignUp} className="space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Full Name</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 text-muted-foreground" size={20} />
+                  <User className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <Input
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="Enter your full name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className="pl-10 h-11"
+                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50 font-medium"
                   />
                 </div>
               </div>
 
-              {/* Email */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Email Address</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 text-muted-foreground" size={20} />
+                  <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
                   <Input
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="name@university.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 h-11"
+                    className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50 font-medium"
                   />
                 </div>
               </div>
 
-              {/* Password */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 text-muted-foreground" size={20} />
-                  <Input
-                    type="password"
-                    placeholder="Minimum 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="pl-10 h-11"
-                  />
+              <div className="grid grid-cols-1 gap-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Create Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Confirm Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 text-muted-foreground" size={20} />
-                  <Input
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="pl-10 h-11"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-slate-50/50"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Terms */}
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  required
-                  className="mt-1 rounded border-border"
-                />
-                <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed">
-                  I agree to the Terms of Service and Privacy Policy
+              <div className="flex items-start gap-3 py-2">
+                <div className="mt-1">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    required
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </div>
+                <label htmlFor="terms" className="text-[11px] text-slate-500 leading-snug font-medium">
+                  I agree to the <Link href="/terms" className="text-blue-600 font-bold hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-blue-600 font-bold hover:underline">Privacy Policy</Link>
                 </label>
               </div>
 
@@ -152,26 +178,38 @@ export default function SignUpPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary text-white hover:bg-primary/90 h-11 font-semibold"
+                className="w-full bg-[#0A2647] hover:bg-[#144272] text-white h-14 rounded-2xl font-bold text-lg shadow-xl shadow-blue-900/10 transition-all active:scale-[0.98] disabled:opacity-70"
               >
-                {loading ? 'Creating account...' : 'Create Account'}
+                {loading ? (
+                  <span className="flex items-center gap-2 italic">
+                    Setting up your profile...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Join InternAdda Now <CheckCircle size={20} />
+                  </span>
+                )}
               </Button>
             </form>
 
             {/* Divider */}
-            <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-border" />
-              <p className="text-sm text-muted-foreground">Already have an account?</p>
-              <div className="flex-1 h-px bg-border" />
+            <div className="my-8 flex items-center gap-4">
+              <div className="flex-1 h-[1px] bg-slate-100" />
+              <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Already a Member?</p>
+              <div className="flex-1 h-[1px] bg-slate-100" />
             </div>
 
             {/* Sign In Link */}
             <Link href="/auth/signin">
-              <Button variant="outline" className="w-full h-11 font-semibold bg-transparent">
-                Sign In
+              <Button variant="outline" className="w-full h-14 rounded-2xl font-bold border-slate-200 text-[#0A2647] hover:bg-slate-50 bg-transparent transition-all">
+                Sign In to Your Account
               </Button>
             </Link>
           </div>
+          
+          <p className="text-center mt-8 text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em]">
+            Official Partner of Arjuna AI • Secure Encryption
+          </p>
         </div>
       </main>
       <Footer />
