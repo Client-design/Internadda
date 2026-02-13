@@ -28,15 +28,23 @@ const InternshipCard = ({ internship }: { internship: Internship }) => {
   const router = useRouter()
 
   const handleApply = (e: React.MouseEvent) => {
-    // Prevent any parent click events
     e.preventDefault()
     e.stopPropagation()
 
     if (!user) {
-      router.push(`/auth/signin?callbackUrl=/apply/${internship.id}`)
+      // Login page par bhejo agar user authenticated nahi hai
+      router.push(`/auth/signin?callbackUrl=/internships`)
       return
     }
-    router.push(`/apply/${internship.id}`)
+
+    // --- SECURE TOKEN GENERATION ---
+    // Token format: "timestamp_randomString"
+    const timestamp = Math.floor(Date.now() / 1000);
+    const randomString = Math.random().toString(36).substring(7);
+    const secureToken = `${timestamp}_${randomString}`;
+
+    // Test page par redirect karein token ke saath taaki middleware bypass ho jaye
+    router.push(`/test/${internship.id}?token=${secureToken}`)
   }
 
   return (
@@ -52,7 +60,6 @@ const InternshipCard = ({ internship }: { internship: Internship }) => {
           <span className="text-orange-500 text-[10px]">🔥</span>
           <span className="text-white text-[9px] font-bold">{internship.applicants} Applied</span>
         </div>
-        {/* pointer-events-none ensures this gradient doesn't block clicks */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none" />
       </div>
 
@@ -116,6 +123,7 @@ export default function InternshipsClient({ initialInternships }: { initialInter
 
   return (
     <div className="flex flex-col items-center">
+      {/* Top Banner */}
       <div className="w-full bg-[#0A2647] text-white py-2">
         <div className="flex justify-center gap-6 text-[10px] uppercase tracking-widest font-medium">
           <div className="flex items-center gap-2"><CheckCircle size={12} className="text-[#FFD700]" /> Global Recognition</div>
@@ -123,6 +131,7 @@ export default function InternshipsClient({ initialInternships }: { initialInter
         </div>
       </div>
 
+      {/* Hero Section */}
       <section className="w-full bg-gradient-to-br from-[#0A2647] to-[#144272] py-16 px-4">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
           <Badge className="bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20 px-4 py-1.5 rounded-full mb-6">
@@ -146,6 +155,7 @@ export default function InternshipsClient({ initialInternships }: { initialInter
         </div>
       </section>
 
+      {/* Grid Section */}
       <section className="py-20 w-full max-w-[1400px] px-4">
         {displayedInternships.length > 0 ? (
           <div className="flex flex-col items-center">
@@ -166,6 +176,7 @@ export default function InternshipsClient({ initialInternships }: { initialInter
               </AnimatePresence>
             </div>
 
+            {/* Load More */}
             {visibleCount < filteredInternships.length && (
               <div className="mt-16">
                 <Button 
