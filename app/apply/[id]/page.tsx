@@ -46,8 +46,12 @@ export default function ApplyPage() {
 
     setIsProcessing(true)
     try {
-      // 1. Create Order via your Backend API
-      const response = await fetch('/api/payment/create-order', {
+      // 1. Get the current origin (e.g., https://internadda.vercel.app)
+      const origin = window.location.origin;
+
+      // 2. Create Order via your Backend API
+      // Using /payment/create-order to match your file structure: app/payment/create-order/route.ts
+      const response = await fetch(`${origin}/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,23 +65,27 @@ export default function ApplyPage() {
         })
       });
 
-      const { payment_session_id } = await response.json();
+      const result = await response.json();
 
-      // 2. Initialize Cashfree SDK
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create order");
+      }
+
+      // 3. Initialize Cashfree SDK
       const { load } = await import('@cashfreepayments/cashfree-js');
       const cashfree = await load({ 
         mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PRODUCTION' ? "production" : "sandbox" 
       });
       
-      // 3. Open Checkout
+      // 4. Open Checkout
       await cashfree.checkout({
-        paymentSessionId: payment_session_id,
+        paymentSessionId: result.payment_session_id,
         redirectTarget: "_self" 
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Payment failed:", error);
-      alert("Unable to initiate payment. Please check your connection.");
+      alert(error.message || "Unable to initiate payment. Please check your connection.");
     } finally {
       setIsProcessing(false)
     }
@@ -92,7 +100,6 @@ export default function ApplyPage() {
         </motion.div>
 
         <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white">
-          {/* Header Section */}
           <div className="bg-[#0A2647] p-8 text-white flex items-center justify-between">
             <div>
               <p className="text-blue-300 text-xs font-bold uppercase tracking-widest mb-1">Applying For</p>
@@ -105,7 +112,6 @@ export default function ApplyPage() {
           </div>
 
           <div className="p-8 space-y-8">
-            {/* Trust Building Steps */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { icon: <Zap size={20}/>, title: "Qualifying Test", desc: "Instant Access" },
@@ -120,7 +126,6 @@ export default function ApplyPage() {
               ))}
             </div>
 
-            {/* Application Form */}
             <div className="space-y-6">
                <div className="flex items-center gap-2 border-b pb-2">
                  <h3 className="font-bold text-[#0A2647]">Confirm Professional Details</h3>
@@ -171,7 +176,6 @@ export default function ApplyPage() {
                </div>
             </div>
 
-            {/* Payment Section */}
             <div className="bg-[#0A2647]/5 p-6 rounded-3xl border border-[#0A2647]/10">
                <div className="flex justify-between items-center mb-6">
                  <div>
