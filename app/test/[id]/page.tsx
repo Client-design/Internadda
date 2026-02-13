@@ -28,20 +28,39 @@ export default function InternshipAssessment() {
   const [isFinished, setIsFinished] = useState(false)
   const [cheatingAttempts, setCheatingAttempts] = useState(0)
 
-  // --- 1. Gatekeeper: Security & Payment Check ---
+  // --- 1. Gatekeeper: Security & Token Bypass Logic ---
   useEffect(() => {
     const verifyAccess = async () => {
-      // Wait for auth to initialize
       if (authLoading) return
 
-      // Redirect if not logged in
+      // A. Check for Bypass Token in URL first
+      const params = new URLSearchParams(window.location.search)
+      const token = params.get('token')
+
+      if (token) {
+        try {
+          const [timestampStr] = token.split('_')
+          const tokenTime = parseInt(timestampStr)
+          const currentTime = Math.floor(Date.now() / 1000)
+
+          // If token is fresh (less than 5 mins old), grant instant access
+          if (currentTime - tokenTime < 300) {
+            setIsAuthorized(true)
+            setVerifying(false)
+            return // Skip Database check
+          }
+        } catch (e) {
+          console.error("Token bypass verification failed")
+        }
+      }
+
+      // B. Standard Session Check (if no valid token)
       if (!user) {
         router.push('/auth/signin')
         return
       }
 
       try {
-        // Query database for payment status
         const { data, error } = await supabase
           .from('profiles')
           .select('has_paid')
@@ -105,24 +124,41 @@ export default function InternshipAssessment() {
 
   // --- Render Logic ---
 
-  // Show professional loader while checking security
   if (authLoading || verifying) {
     return <LoadingScreen />
   }
 
-  // Payment Required UI (Gatekeeper Block)
+  // Refined Polite Access Denied UI
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0A2647] flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full bg-white p-10 rounded-[2.5rem] text-center shadow-2xl">
-          <div className="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock className="text-red-600" size={32} />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          className="max-w-md w-full bg-white p-10 rounded-[2.5rem] text-center shadow-2xl border-t-8 border-[#FFD700]"
+        >
+          <div className="bg-amber-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Lock className="text-[#FFD700]" size={36} />
           </div>
-          <h2 className="text-2xl font-black text-[#0A2647] mb-4">Access Restricted</h2>
-          <p className="text-gray-500 mb-8">This assessment is only available to premium members. Please complete your enrollment to proceed.</p>
-          <Button onClick={() => router.push('/courses')} className="w-full bg-[#FFD700] hover:bg-[#e6c200] text-[#0A2647] py-7 rounded-2xl font-black text-lg shadow-lg">
-            Complete Enrollment
-          </Button>
+          <h2 className="text-2xl font-black text-[#0A2647] mb-3">Premium Content</h2>
+          <p className="text-gray-500 mb-8 leading-relaxed">
+            It looks like you haven't enrolled in this domain yet. Please complete the enrollment to unlock this assessment and your interview with **Interna AI**.
+          </p>
+          <div className="space-y-3">
+            <Button 
+              onClick={() => router.push('/courses')} 
+              className="w-full bg-[#0A2647] hover:bg-[#144272] text-white py-7 rounded-2xl font-bold text-lg transition-all active:scale-95"
+            >
+              View Enrollment Options
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => router.push('/internships')} 
+              className="text-[#0A2647] font-bold"
+            >
+              Explore Other Roles
+            </Button>
+          </div>
         </motion.div>
       </div>
     )
@@ -168,7 +204,6 @@ export default function InternshipAssessment() {
   return (
     <div className="min-h-screen bg-[#0A2647] p-4 md:p-12 font-sans selection:bg-[#FFD700] selection:text-[#0A2647]">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-10 bg-white/10 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/20 shadow-xl">
           <div className="flex items-center gap-3">
             <div className="bg-[#FFD700] text-[#0A2647] p-2 rounded-xl">
@@ -187,7 +222,6 @@ export default function InternshipAssessment() {
           </div>
         </div>
 
-        {/* Progress */}
         <div className="mb-10 px-2">
           <div className="flex justify-between text-white/40 text-[10px] font-bold uppercase mb-2">
             <span>Progress: {currentIdx + 1} / {testData.questions.length}</span>
@@ -196,7 +230,6 @@ export default function InternshipAssessment() {
           <Progress value={((currentIdx + 1) / testData.questions.length) * 100} className="h-2 bg-white/10" />
         </div>
 
-        {/* Question Card */}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIdx}
@@ -222,7 +255,6 @@ export default function InternshipAssessment() {
               ))}
             </div>
             
-            {/* Subtle background decoration for premium feel */}
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-slate-50 rounded-full blur-3xl opacity-50" />
           </motion.div>
         </AnimatePresence>
