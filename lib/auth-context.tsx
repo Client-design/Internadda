@@ -22,13 +22,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true
 
     const initSession = async () => {
+      // Use getUser() for the initial check to ensure the session is valid server-side
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user },
+      } = await supabase.auth.getUser()
 
       if (!mounted) return
 
-      setUser(session?.user ?? null)
+      setUser(user)
       setLoading(false)
     }
 
@@ -37,8 +38,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      async (_event, session: Session | null) => {
-        setUser(session?.user ?? null)
+      async (event, session: Session | null) => {
+        if (session) {
+          setUser(session.user)
+        } else {
+          setUser(null)
+        }
+        
+        // Ensure loading is set to false after any auth change
+        setLoading(false)
       }
     )
 
@@ -48,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // 🔥 FIXED SIGN IN
+  // SIGN IN
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -57,13 +65,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error
 
-    // 🔥 Ensure session exists before continuing
+    // Ensure session exists
     if (!data.session) {
       throw new Error('Login failed. No session returned.')
     }
 
-    // Small delay ensures cookie sync before middleware runs
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    // This delay is critical for Next.js middleware to see the cookie before redirecting
+    await new Promise((resolve) => setTimeout(resolve, 500))
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
