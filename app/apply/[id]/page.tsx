@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { CheckCircle2, ShieldCheck, Zap, Star, School, GraduationCap, Lock, Ticket, Tag } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 const MOCK_INTERNSHIPS = [
@@ -22,9 +22,9 @@ const MOCK_INTERNSHIPS = [
 ];
 
 const COUPONS: Record<string, number> = {
-  'CAMPUSVIP': 0.25,  // 25% off
-  'DREAMSTART': 0.10, // 10% off
-  'TECHTITANS': 0.90  // 90% off
+  'CAMPUSVIP': 0.25,
+  'DREAMSTART': 0.10,
+  'TECHTITANS': 0.90
 };
 
 export default function ApplyPage() {
@@ -37,14 +37,17 @@ export default function ApplyPage() {
   const [education, setEducation] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   
-  // Coupon States
   const [couponInput, setCouponInput] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discount: number} | null>(null)
   const [originalPrice] = useState(199)
   const [finalPrice, setFinalPrice] = useState(199)
 
   useEffect(() => {
-    if (!loading && !user) router.push('/auth/signin')
+    // Auth Check: Agar loading khatam ho gayi aur user nahi hai, tabhi redirect karein
+    if (!loading && !user) {
+      const currentPath = window.location.pathname
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(currentPath)}`)
+    }
     const data = MOCK_INTERNSHIPS.find(i => i.id === id)
     setInternship(data)
   }, [user, loading, id, router])
@@ -71,23 +74,22 @@ export default function ApplyPage() {
     setIsProcessing(true)
     try {
       const origin = window.location.origin;
-      
-      // Updated returnUrl: payment ke baad seedha test page khulega
       const returnUrl = `${origin}/test/${id}`;
 
+      // Backend API call with corrected parameter mapping
       const response = await fetch(`${origin}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: finalPrice,
-          customerId: user?.id,
+          userId: user?.id, // Ensuring userId is passed for backend 'user_id' mapping
           customerName: user?.user_metadata?.full_name || 'Student',
           customerEmail: user?.email,
-          internshipId: id,
+          testId: id, // Mapping internshipId to testId for backend consistency
           college: college,
           education: education,
           couponCode: appliedCoupon?.code || null,
-          returnUrl: returnUrl // Sending the test page link
+          returnUrl: returnUrl 
         })
       });
 
@@ -102,6 +104,7 @@ export default function ApplyPage() {
         mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PRODUCTION' ? "production" : "sandbox" 
       });
       
+      // Initializing Cashfree checkout with direct redirect to returnUrl
       await cashfree.checkout({
         paymentSessionId: result.payment_session_id,
         redirectTarget: "_self" 
@@ -205,7 +208,6 @@ export default function ApplyPage() {
                </div>
             </div>
 
-            {/* Coupon Section */}
             <div className="pt-4 border-t border-dashed">
                 <label className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1 mb-2 tracking-widest">
                   <Ticket size={12} className="text-blue-500" /> Have a Coupon?
