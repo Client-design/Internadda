@@ -253,7 +253,7 @@ export default function Home() {
         <section className="bg-white py-8 border-b border-gray-100 flex justify-center" aria-label="Academic Partners">
           <div className="max-w-[1400px] w-full mx-auto px-4">
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 lg:gap-20">
-              <p className="w-full text-center lg:w-auto text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 lg:mb-0">Academic Partners</p>
+              <p className="w-full text-center lg:w-auto text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 lg:mb-0">Global Recognition </p>
               {partners.map((partner, idx) => (
                 <div key={idx} className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-default">
                   <span className="text-2xl" aria-hidden="true">{partner.logo}</span>
